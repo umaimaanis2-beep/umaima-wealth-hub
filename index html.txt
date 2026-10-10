@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umaima Wealth Hub | Financial Advisory & Risk Assessment</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #0d9488;
+            --accent-hover: #0f766e;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .intro-screen, .results-screen {
+            text-align: center;
+        }
+
+        .intro-screen h2, .results-screen h2 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .intro-screen p, .results-screen p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent);
+            background: #f0fdf4;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            accent-color: var(--accent);
+            transform: scale(1.2);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .score-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Umaima Wealth Hub</h1>
+            <p>Discover Your Financial Risk Profile</p>
+        </header>
+
+        <div class="content">
+            <!-- Intro Screen -->
+            <div id="introScreen" class="intro-screen">
+                <h2>Find Your Investor Profile</h2>
+                <p>Take our quick 15-question assessment to uncover your risk tolerance, understand your goals, and receive tailored wealth-building strategies.</p>
+                <button class="btn" onclick="startAssessment()">Start Assessment</button>
+            </div>
+
+            <!-- Quiz Container -->
+            <div id="quizContainer" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                
+                <div id="questionCardWrapper">
+                    <!-- Dynamic Question Inserted Here -->
+                </div>
+
+                <div class="nav-buttons">
+                    <button id="prevBtn" class="btn-secondary" onclick="prevQuestion()" style="visibility: hidden;">Back</button>
+                    <span id="questionCounter" style="color: var(--text-light); font-size: 0.9rem;">Question 1 of 15</span>
+                    <button id="nextBtn" class="btn" onclick="nextQuestion()">Next</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="results-screen" style="display: none;">
+                <h2>Your Assessment is Complete!</h2>
+                <p>Based on your answers, your calculated risk tolerance score is:</p>
+                <div id="finalScore" class="score-display">0 / 75</div>
+                <p id="profileDescription" style="font-weight: 500; color: var(--primary);"></p>
+                <button class="btn" onclick="resetAssessment()">Retake Assessment</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "1. When you invest your money, what is your primary long-term objective?",
+                options: [
+                    { text: "Maximum capital growth, accepting high volatility", score: 5 },
+                    { text: "Strong growth with manageable moderate ups and downs", score: 4 },
+                    { text: "A balanced mix of growth and capital preservation", score: 3 },
+                    { text: "Stable, predictable income with low risk of loss", score: 2 },
+                    { text: "Total safety and preservation of principal amount", score: 1 }
+                ]
+            },
+            {
+                q: "2. How would you react if your investment portfolio dropped by 20% over a short period?",
+                options: [
+                    { text: "View it as a buying opportunity and invest more", score: 5 },
+                    { text: "Hold steady and wait for the market to recover", score: 4 },
+                    { text: "Feel uncomfortable but maintain current positions", score: 3 },
+                    { text: "Sell a portion of riskier assets to cut losses", score: 2 },
+                    { text: "Sell everything immediately to prevent further loss", score: 1 }
+                ]
+            },
+            {
+                q: "3. What is your typical investment time horizon before you need to withdraw significant funds?",
+                options: [
+                    { text: "More than 10 years", score: 5 },
+                    { text: "7 to 10 years", score: 4 },
+                    { text: "4 to 6 years", score: 3 },
+                    { text: "2 to 3 years", score: 2 },
+                    { text: "Less than 1 year", score: 1 }
+                ]
+            },
+            {
+                q: "4. Which of these statements best describes your attitude toward financial risk?",
+                options: [
+                    { text: "Aggressive: High risk is essential for high rewards", score: 5 },
+                    { text: "Calculated: I take measured risks with strong research", score: 4 },
+                    { text: "Moderate: I prefer balanced exposure across asset classes", score: 3 },
+                    { text: "Conservative: I prefer minimizing potential drawdowns", score: 2 },
+                    { text: "Risk-averse: I avoid uncertainty at all costs", score: 1 }
+                ]
+            },
+            {
+                q: "5. How stable is your current and expected future income source?",
+                options: [
+                    { text: "Extremely secure with strong upward growth potential", score: 5 },
+                    { text: "Very stable and dependable salary/business revenue", score: 4 },
+                    { text: "Moderately stable with occasional seasonal fluctuations", score: 3 },
+                    { text: "Somewhat variable or commission-dependent", score: 2 },
+                    { text: "Unpredictable or irregular income streams", score: 1 }
+                ]
+            },
+            {
+                q: "6. Do you currently maintain an emergency cash reserve separate from your investments?",
+                options: [
+                    { text: "Yes, covering 12+ months of living expenses", score: 5 },
+                    { text: "Yes, covering 6 to 12 months", score: 4 },
+                    { text: "Yes, covering 3 to 5 months", score: 3 },
+                    { text: "Barely 1 to 2 months saved", score: 2 },
+                    { text: "No emergency fund established yet", score: 1 }
+                ]
+            },
+            {
+                q: "7. How experienced are you with investing in financial markets (stocks, crypto, real estate, funds)?",
+                options: [
+                    { text: "Expert: Highly knowledgeable, active daily participant", score: 5 },
+                    { text: "Experienced: Comfortable managing my own diversified portfolio", score: 4 },
+                    { text: "Intermediate: Understand basics and hold standard funds", score: 3 },
+                    { text: "Beginner: Just starting to learn market mechanics", score: 2 },
+                    { text: "Novice: Complete beginner with zero prior exposure", score: 1 }
+                ]
+            },
+            {
+                q: "8. Imagine you won a cash windfall of $50,000. What would you most likely do?",
+                options: [
+                    { text: "Invest 100% into high-growth growth stocks or ventures", score: 5 },
+                    { text: "Allocate mostly to growth assets with a small savings portion", score: 4 },
+                    { text: "Split evenly between investments and debt payoff", score: 3 },
+                    { text: "Pay off high-interest debt and put the rest in a high-yield account", score: 2 },
+                    { text: "Keep it entirely liquid in cash or insured savings", score: 1 }
+                ]
+            },
+            {
+                q: "9. How important is immediate liquidity (access to cash without penalties) for your funds?",
+                options: [
+                    { text: "Not important; I can lock funds away for years", score: 5 },
+                    { text: "Slightly important; prefer mostly long-term lockups", score: 4 },
+                    { text: "Moderately important; need balanced accessibility", score: 3 },
+                    { text: "Very important; need access within a short notice", score: 2 },
+                    { text: "Critical; I might need immediate access at any time", score: 1 }
+                ]
+            },
+            {
+                q: "10. What is your preferred approach to portfolio management?",
+                options: [
+                    { text: "Active trading, spotting trends, and reallocating frequently", score: 5 },
+                    { text: "Quarterly check-ins with opportunistic adjustments", score: 4 },
+                    { text: "Balanced semi-annual reviews with steady contributions", score: 3 },
+                    { text: "Set-it-and-forget-it automated index investing", score: 2 },
+                    { text: "Professional management where I don't have to look at it", score: 1 }
+                ]
+            },
+            {
+                q: "11. How do you view debt in your overall financial strategy?",
+                options: [
+                    { text: "Strategic leverage used actively to accelerate wealth building", score: 5 },
+                    { text: "Manageable low-interest mortgages or business loans only", score: 4 },
+                    { text: "Neutral; comfortable with standard structured debt", score: 3 },
+                    { text: "Uncomfortable with debt; prefer paying down balances quickly", score: 2 },
+                    { text: "Debt-free philosophy; avoid borrowing entirely", score: 1 }
+                ]
+            },
+            {
+                q: "12. How frequently do you check your investment balances or financial dashboards?",
+                options: [
+                    { text: "Multiple times a day", score: 5 },
+                    { text: "Once or twice a week", score: 4 },
+                    { text: "Once a month", score: 3 },
+                    { text: "Every few months", score: 2 },
+                    { text: "Rarely or almost never", score: 1 }
+                ]
+            },
+            {
+                q: "13. If an investment you owned doubled in value within 6 months, what would you do?",
+                options: [
+                    { text: "Let it ride and increase my stake for higher compounding", score: 5 },
+                    { text: "Take partial profits off the table and let the rest grow", score: 4 },
+                    { text: "Rebalance back to my original target allocation", score: 3 },
+                    { text: "Sell out entirely to lock in the sudden gains", score: 2 },
+                    { text: "Avoid high-growth assets that move that fast in the first place", score: 1 }
+                ]
+            },
+            {
+                q: "14. How would a sudden unexpected major expense (e.g., medical or home repair) impact your finances?",
+                options: [
+                    { text: "Easily covered out of cash flow without touching investments", score: 5 },
+                    { text: "Handled comfortably via my emergency fund", score: 4 },
+                    { text: "Manageable, though it would require slight budget adjustments", score: 3 },
+                    { text: "Stressful; would require selling some investments", score: 2 },
+                    { text: "Severe financial strain", score: 1 }
+                ]
+            },
+            {
+                q: "15. Which phrase best summarizes your overarching financial philosophy?",
+                    options: [
+                    { text: "High risk yields high historical rewards", score: 5 },
+                    { text: "Calculated risks build lasting legacies", score: 4 },
+                    { text: "Consistency and balance win the race", score: 3 },
+                    { text: "Protecting capital is more important than chasing returns", score: 2 },
+                    { text: "Peace of mind and zero loss is paramount", score: 1 }
+                ]
+            }
+        ];
+
+        let currentIdx = 0;
+        let answers = new Array(questions.length).fill(null);
+
+        function startAssessment() {
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qObj = questions[currentIdx];
+            const wrapper = document.getElementById('questionCardWrapper');
+            
+            let html = `<div class="question-title">${qObj.q}</div><div class="options-list">`;
+            qObj.options.forEach((opt, idx) => {
+                const checked = answers[currentIdx] === idx ? 'checked' : '';
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="questionOption" value="${idx}" ${checked} onclick="selectOption(${idx})">
+                        ${opt.text}
+                    </label>
+                `;
+            });
+            html += `</div>`;
+            wrapper.innerHTML = html;
+
+            // Update Progress
+            const progress = ((currentIdx + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('questionCounter').innerText = `Question ${currentIdx + 1} of ${questions.length}`;
+
+            // Button visibility
+            document.getElementById('prevBtn').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+            document.getElementById('nextBtn').innerText = currentIdx === questions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function selectOption(idx) {
+            answers[currentIdx] = idx;
+        }
+
+        function nextQuestion() {
+            if (answers[currentIdx] === null) {
+                alert("Please select an option before proceeding.");
+                return;
+            }
+
+            if (currentIdx < questions.length - 1) {
+                currentIdx++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+
+            const totalScore = answers.reduce((sum, optIdx, qIdx) => {
+                return sum + questions[qIdx].options[optIdx].score;
+            }, 0);
+
+            document.getElementById('finalScore').innerText = `${totalScore} / 75`;
+
+            let profile = "";
+            if (totalScore >= 60) {
+                profile = "Aggressive Growth Investor: You have a high risk appetite suited for long-term equity growth, high-beta assets, and expansion strategies.";
+            } else if (totalScore >= 45) {
+                profile = "Growth-Oriented Investor: You balance strong capital appreciation goals with manageable volatility buffers.";
+            } else if (totalScore >= 30) {
+                profile = "Balanced Investor: You seek a healthy equilibrium between steady income generation and moderate portfolio growth.";
+            } else if (totalScore >= 18) {
+                profile = "Conservative Investor: Capital preservation and minimizing drawdowns are your highest priorities.";
+            } else {
+                profile = "Risk-Averse Saver: You prioritize absolute safety, liquidity, and principal security above all else.";
+            }
+
+            document.getElementById('profileDescription').innerText = profile;
+        }
+
+        function resetAssessment() {
+            currentIdx = 0;
+            answers.fill(null);
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
